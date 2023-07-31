@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-q10c+btvjz8(sp2g5u_i6i5^d+o!06$dcfva(w-t9zbp#(=*)!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 
 
 # Application definition
@@ -72,7 +73,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'LoanRestProject.wsgi.application'
+# WSGI_APPLICATION = 'LoanRestProject.wsgi.application'
+WSGI_APPLICATION = 'LoanRestProject.wsgi.app'
+
+# WSGI_APPLICATION = 'vercel_app.wsgi.app'
 
 
 # Database
