@@ -80,8 +80,16 @@ WSGI_APPLICATION = 'LoanRestProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
+        'URL': 'postgresql://postgres:OP9WnZ5WQ0RmttpAAeNK@containers-us-west-110.railway.app:5566/railway',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'OP9WnZ5WQ0RmttpAAeNK',
+        'HOST': 'containers-us-west-110.railway.app',
+        'PORT': '5566',
     }
 }
 

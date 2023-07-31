@@ -1,14 +1,14 @@
 POST http://127.0.0.1:8000/signup 
 Content-Type: application/json
 
-{ "username": "cc","password": "Pass1234!", "email": "adam@mail.com","Role":"Customer" }
+{ "username": "Abdelrahman","password": "Pass1234!", "email": "adam@mail.com","Role":"Personnel" }
 
 ###
 
 POST http://127.0.0.1:8000/login 
 Content-Type: application/json
 
-{ "username": "cc", "password": "Pass1234!" }
+{ "username": "b", "password": "Pass1234!" }
 
 ###
 
@@ -19,23 +19,23 @@ Authorization: token db1ad9d1941c35ea957b4793ec0086e08b8fee81
 
 POST http://127.0.0.1:8000/postinboundloans 
 Content-Type: application/json
-Authorization: token db1ad9d1941c35ea957b4793ec0086e08b8fee81
+Authorization: token 49adfce1a473b57ea39f02966546e3ae116c94a7
 
-{"Amount":"2000"}
+{"Amount":"2000000"}
 
 ###
 
 GET http://127.0.0.1:8000/getinboundloans 
 Content-Type: application/json
-Authorization: token db1ad9d1941c35ea957b4793ec0086e08b8fee81
+Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
 
-# {"ProviderID":5}
+{"ProviderID":1}
 
 ###
 
 Post http://127.0.0.1:8000/setbankparameter 
 Content-Type: application/json
-Authorization: token 95ede9ec8da251be295e4ba5c077ece76ca52aa0
+Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
 
 {
 "MinAmount":100,
@@ -49,7 +49,7 @@ Authorization: token 95ede9ec8da251be295e4ba5c077ece76ca52aa0
 
 POST http://127.0.0.1:8000/postoutboundloans 
 Content-Type: application/json
-Authorization: token ae34f3afc62822caf03dbf63ba9b801cc3dcda23
+Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
 
 {"Amount":2000}
 
@@ -58,14 +58,14 @@ Authorization: token ae34f3afc62822caf03dbf63ba9b801cc3dcda23
 
 GET http://127.0.0.1:8000/getoutboundloans 
 Content-Type: application/json
-Authorization: token ae34f3afc62822caf03dbf63ba9b801cc3dcda23
+Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
 
 {"CustomerID":10000}
 
 ###
 
-GET http://127.0.0.1:8000/postpayment 
+POST http://127.0.0.1:8000/postpayment 
 Content-Type: application/json
-Authorization: token ae34f3afc62822caf03dbf63ba9b801cc3dcda23
+Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
 
 {"LoanID":1}

@@ -1,0 +1,14 @@
+{
+    "builds": [
+      {
+        "src": "LoanRestProject/wsgi.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "LoanRestProject/wsgi.py"
+      }
+    ]
+}
