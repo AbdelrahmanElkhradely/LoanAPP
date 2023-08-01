@@ -20,6 +20,7 @@ from LoanRestProject import views
 from django.urls import re_path
 from django_api_admin.sites import site
 
+
 urlpatterns = [
     path('admin', admin.site.urls),
     re_path('getinboundloans',views.get_inbound_loan_list),

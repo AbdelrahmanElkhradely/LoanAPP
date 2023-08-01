@@ -10,14 +10,17 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password ,check_password
+from django.contrib.auth.hashers import make_password 
 from django.db.models import Sum
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 
 @api_view(['POST'])
 def signup(request):
+    content_type = ContentType.objects.get_for_model(LoanRestProject.models.User)
+    permissions=Permission.objects.filter(content_type=content_type)
     request.data['password']=make_password(request.data['password'])
     serializer = TempUserSerializer(data=request.data)
     if serializer.is_valid():
@@ -28,16 +31,33 @@ def signup(request):
         elif request.data['Role'] == 'Personnel':
             serializer = PersonnelSerializer(data=request.data)
         else:
-            return Response({"Error":"Invalid user type"}, status=status.HTTP_200_OK)
+            return Response({"Error":"Invalid user role"}, status=status.HTTP_200_OK)
         
         if serializer.is_valid():
             serializer.save()
             user = LoanRestProject.models.User.objects.get(username=request.data['username'])
             token = Token.objects.create(user=user)
-            print(serializer.data)
-            return Response({'token': token.key, 'user':serializer.data['username']})
+            if user.role=='PROVIDER':
+                for perm in permissions:
+                    if perm.codename=='view_inboundloans' or perm.codename=='add_inboundloans':
+                        print("permission added")
+                        print(perm.codename)
+                        print("---------")
+                        user.user_permissions.add(perm)
+                        user.save()
+            elif user.role=='CUSTOMER':
+                for perm in permissions:
+                    if perm.codename=='view_outboundloans' or perm.codename=='add_outboundloans' or perm.codename=='add_payment':
+                        user.user_permissions.add(perm)
+                        user.save()    
+            elif user.role=='PERSONNEL':
+                for perm in permissions:
+                    if perm.codename=='view_outboundloans' or perm.codename=='view_inboundloans' or perm.codename=='add_bankparameter':
+                        user.user_permissions.add(perm)
+                        user.save()
+            return Response({'token': token.key, 'user':serializer.data['username']},status.HTTP_200_OK)
         else:
-             return Response({"Error":"Invalid data"}, status=status.HTTP_200_OK)
+             return Response({"Error":"user name is already exist"}, status=status.HTTP_409_CONFLICT)
 
     else:
         return Response(serializer.errors, status=status.HTTP_200_OK)
@@ -51,7 +71,7 @@ def login(request):
     token, created = Token.objects.get_or_create(user=user)
     serializer = FullUserserilizer(user)
 
-    return Response({'token': token.key, 'user': serializer.data})
+    return Response({'token': token.key, 'user': serializer.data},status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -60,12 +80,16 @@ def login(request):
 def test_token(request):
     print(request.auth )
     user_id = Token.objects.get(key=request.auth.key).user_id
+    user = get_object_or_404(LoanRestProject.models.User, id=user_id)
+    print(user.has_perm('LoanRestProject.view_inboundloans'))
+    print(user.user_permissions)
     print(request.user)
     return Response("passed!")
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.view_inboundloans')
 def get_inbound_loan_list(request):
     # user_id = Token.objects.get(key=request.auth.key).user_id
     user_id=request.user.id
@@ -75,11 +99,8 @@ def get_inbound_loan_list(request):
     serializer=FullUserserilizer(user)
     if serializer.data['role'] == 'PERSONNEL':
         if "ProviderID" not in request.data:
-            return Response({"Error":"Invalid schema"})
+            return Response({"Error":"Invalid schema"},status.HTTP_422_UNPROCESSABLE_ENTITY)
         user_id=request.data['ProviderID']
-
-    elif serializer.data['role'] == 'CUSTOMER':
-        return Response({"Error":"You are not authorized"})
     # inboundloans=InboundLoan.objects.all()
     inboundloans=InboundLoan.objects.filter(ProviderID=user_id)
     total=0
@@ -90,60 +111,57 @@ def get_inbound_loan_list(request):
         count+=1
 
     serializer=InboundLoanSerializer(inboundloans , many=True)
-    return JsonResponse({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data})
+    return JsonResponse({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data},status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.add_inboundloans')
 def post_inbound_loan(request):
     # user_id = Token.objects.get(key=request.auth.key).user_id
     user_id=request.user.id
     request.data['ProviderID']=user_id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
-
-    if serializer.data['role'] != 'PROVIDER':
-        return Response({"Error":"You are not authorized"})
     
     serializer=InboundLoanSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
     else:
-        return Response({'Error':'INVALID SCHEMA VALIDATION'})
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.add_bankparameter')
 def post_bank_parameter(request):
     user_id=request.user.id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
-    if serializer.data['role'] != 'PERSONNEL':
-        return Response({"Error":"You are not authorized"})
+
+    Bank.objects.all().delete()
+    request.data['CustomerID']=user_id
+    serializer=BankSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
     else:
-        Bank.objects.all().delete()
-        request.data['CustomerID']=user_id
-        serializer=BankSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        else:
-            return Response({'Error':'INVALID SCHEMA VALIDATION'})
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.add_outboundloans')
 def post_outbound_loan(request):
     # user_id = Token.objects.get(key=request.auth.key).user_id
     user_id=request.user.id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
-    if serializer.data['role'] != 'CUSTOMER':
-        return Response({"Error":"You are not authorized"})
+
     
     r_amount=request.data['Amount']
     bank=Bank.objects.get()
@@ -164,7 +182,7 @@ def post_outbound_loan(request):
     net_bank_balance=float(inboundloans_sum['Amount__sum'])-float(unpaidoutboundloans_sum['UnpaidAmount__sum'])
     print(net_bank_balance)
     if int(r_amount) < int(bankserilizer.data['MinAmount']) or r_amount > int(bankserilizer.data['MaxAmount']) or r_amount > net_bank_balance:
-            return Response({'Error':'INVALID Amount according to bank parameters'})
+            return Response({'Error':'INVALID Amount according to bank parameters'},status.HTTP_400_BAD_REQUEST)
     
     
     request.data['CustomerID']=user_id
@@ -180,12 +198,13 @@ def post_outbound_loan(request):
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
     else:
-        return Response({'Error':'INVALID SCHEMA VALIDATION'})
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.view_outboundloans')
 def get_outbound_loan_list(request):
     user_id=request.user.id
     # print(user_id)
@@ -194,11 +213,9 @@ def get_outbound_loan_list(request):
     serializer=FullUserserilizer(user)
     if serializer.data['role'] == 'PERSONNEL':
         if "CustomerID" not in request.data:
-            return Response({"Error":"Invalid schema"})
+            return Response({"Error":"Invalid schema"},status.HTTP_422_UNPROCESSABLE_ENTITY)
         user_id=request.data['CustomerID']
 
-    elif serializer.data['role'] == 'PROVIDER':
-        return Response({"Error":"You are not authorized"})
     # inboundloans=InboundLoan.objects.all()
     outboundloans=OutboundLoan.objects.filter(CustomerID=user_id)
     total=0
@@ -209,46 +226,39 @@ def get_outbound_loan_list(request):
         count+=1
 
     serializer=OutboundLoanSerializer(outboundloans , many=True)
-    return JsonResponse({'Total number of loans':count,'Total unpaid loans amount':total,'outboundloans' : serializer.data})
-
-
-
+    return JsonResponse({'Total number of loans':count,'Total unpaid loans amount':total,'outboundloans' : serializer.data},status.HTTP_200_OK)
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('LoanRestProject.add_payment')
 def post_payment(request):
     user_id=request.user.id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
-    if serializer.data['role'] != 'CUSTOMER':
-        return Response({"Error":"You are not authorized"})
+    loanID=request.data['LoanID']
+    # outboundloans=OutboundLoan.objects.filter(ID=loanID)
+    outboundLoans=get_object_or_404(LoanRestProject.models.OutboundLoan,ID=loanID)
+    serializer=OutboundLoanSerializer(outboundLoans)
+    # serializer.data['PaidAmount']=1000
+    print(serializer.data)
+    if int(user_id) != int(serializer.data['CustomerID']):
+        return Response({"Error":"This is not your loan"})
+    if int(serializer.data['NumberOfUnPaidPayments']) == 0  :
+        return Response({"Error":"There is no payment required for this loan"},status.HTTP_400_BAD_REQUEST)
+    
+    request.data['Amount']=serializer.data['PaymentAmount']
+    request.data['CustomerID']=user_id
+    paymentserializer=PaymentSerializer(data=request.data)
+    
+    if paymentserializer.is_valid():
+        paymentserializer.save()
+        outboundLoans.PaidAmount+=serializer.data['PaymentAmount']
+        outboundLoans.UnpaidAmount-=serializer.data['PaymentAmount']
+        outboundLoans.NumberOfUnPaidPayments-=1
+        outboundLoans.NumberOfPaidPayments+=1
+        outboundLoans.save()
+        return Response(paymentserializer.data,status=status.HTTP_201_CREATED)
     else:
-        loanID=request.data['LoanID']
-        # outboundloans=OutboundLoan.objects.filter(ID=loanID)
-        outboundLoans=get_object_or_404(LoanRestProject.models.OutboundLoan,ID=loanID)
-        serializer=OutboundLoanSerializer(outboundLoans)
-        # serializer.data['PaidAmount']=1000
-        print(serializer.data)
-        if int(user_id) != int(serializer.data['CustomerID']):
-            return Response({"Error":"This is not your loan"})
-
-        if int(serializer.data['NumberOfUnPaidPayments']) == 0  :
-            return Response({"Error":"There is no payment required for this loan"})
-        
-        request.data['Amount']=serializer.data['PaymentAmount']
-        request.data['CustomerID']=user_id
-        paymentserializer=PaymentSerializer(data=request.data)
-        
-        if paymentserializer.is_valid():
-            paymentserializer.save()
-            outboundLoans.PaidAmount+=serializer.data['PaymentAmount']
-            outboundLoans.UnpaidAmount-=serializer.data['PaymentAmount']
-            outboundLoans.NumberOfUnPaidPayments-=1
-            outboundLoans.NumberOfPaidPayments+=1
-
-            outboundLoans.save()
-            return Response(paymentserializer.data,status=status.HTTP_201_CREATED)
-        else:
-            return Response({'Error':'INVALID SCHEMA VALIDATION'})
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 

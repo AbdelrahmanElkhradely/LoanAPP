@@ -1,25 +1,25 @@
-POST http://abdelrahmanelkhradely.pythonanywhere.com/signup 
+POST http://127.0.0.1:8000/signup 
 Content-Type: application/json
 
-{ "username": "Ayman","password": "Pass1234!", "email": "adam@mail.com","Role":"Personnel" }
+{ "username": "c","password": "Pass1234!", "email": "adam@mail.com","Role":"Customer" }
 
 ###
 
 POST http://127.0.0.1:8000/login 
 Content-Type: application/json
 
-{ "username": "b", "password": "Pass1234!" }
+{ "username": "c", "password": "Pass1234!" }
 
 ###
 
 GET http://127.0.0.1:8000/test_token 
 Content-Type: application/json
-Authorization: token db1ad9d1941c35ea957b4793ec0086e08b8fee81
+Authorization: token e0108ed18d3302e1d86cfdc50e31d000c8d787bb
 ###
 
 POST http://127.0.0.1:8000/postinboundloans 
 Content-Type: application/json
-Authorization: token 49adfce1a473b57ea39f02966546e3ae116c94a7
+Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
 {"Amount":"2000000"}
 
@@ -27,7 +27,7 @@ Authorization: token 49adfce1a473b57ea39f02966546e3ae116c94a7
 
 GET http://127.0.0.1:8000/getinboundloans 
 Content-Type: application/json
-Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
+Authorization: token 24415833242863182def77040d689fb05d032f56
 
 {"ProviderID":1}
 
@@ -35,12 +35,13 @@ Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
 
 Post http://127.0.0.1:8000/setbankparameter 
 Content-Type: application/json
-Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
+Authorization: token 858adb38fa38dddc8465bd3f2bdabaee63f214fa
 
 {
 "MinAmount":100,
 "MaxAmount":10000,
-"NumberOfPayments":10
+"NumberOfPayments":10,
+"InterestRate":10
 
 }
 
@@ -49,16 +50,16 @@ Authorization: token fdb93be26f8cdbd66dec7c12610ccb789a9e41e9
 
 POST http://127.0.0.1:8000/postoutboundloans 
 Content-Type: application/json
-Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
+Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
-{"Amount":2000}
+{"Amount":5000}
 
 
 ###
 
 GET http://127.0.0.1:8000/getoutboundloans 
 Content-Type: application/json
-Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
+Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
 {"CustomerID":10000}
 
@@ -66,6 +67,6 @@ Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
 
 POST http://127.0.0.1:8000/postpayment 
 Content-Type: application/json
-Authorization: token f7f8b1e12b127975b7c51b5a4987769e2799c7ca
+Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
 {"LoanID":1}

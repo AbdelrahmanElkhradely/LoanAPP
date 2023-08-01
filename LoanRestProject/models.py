@@ -9,7 +9,16 @@ class User(AbstractUser):
           PROVIDER="PROVIDER",'Provider'
           CUSTOMER="CUSTOMER",'Customer'
           PERSONNEL="PERSONNEL",'Personnel'
-
+    class Meta():
+                permissions = (
+            ('view_inboundloans', 'view inbounds'),
+            ('add_inboundloans', 'add inboundloans'),
+            ('view_outboundloans', 'view outboundloans'),
+            ('add_outboundloans', 'add outboundloans'),
+            ('add_payment', 'add payment'),
+            ('add_bankparameter', 'add bankparameter'),
+            
+        )
     base_role=Role.ADMIN
     role=models.CharField(max_length=50,choices=Role.choices)
 
@@ -33,6 +42,9 @@ class Provider(User):
 
     class Meta:
         proxy = True
+        # permissions = (
+        #     ('trail', 'Friendly permission description'),
+        # )
     def welcome(self):
         return "Only for Providers"
 
