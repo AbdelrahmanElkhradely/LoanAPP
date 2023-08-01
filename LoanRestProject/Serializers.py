@@ -52,7 +52,7 @@ class OutboundLoanSerializer(serializers.ModelSerializer):
             'PaymentAmount',
             'NumberOfPaidPayments',
             'NumberOfUnPaidPayments',
-            'PaidAmount',
+            'PaidAmount','InterestAmount',
             'UnpaidAmount','CreateDate'
         ]
     
@@ -65,6 +65,7 @@ class BankSerializer(serializers.ModelSerializer):
             'MinAmount',
             'MaxAmount',
             'NumberOfPayments',
+            'InterestRate',
             'CustomerID',
             'CreateDate'
         ]

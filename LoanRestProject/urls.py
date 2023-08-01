@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from LoanRestProject import views
 from django.urls import re_path
+from django_api_admin.sites import site
 
 urlpatterns = [
     path('admin', admin.site.urls),
@@ -30,5 +31,6 @@ urlpatterns = [
     re_path('signup', views.signup),
     re_path('login', views.login),
     re_path('test_token', views.test_token),
+    re_path('api_admin/', site.urls)
     
 ]

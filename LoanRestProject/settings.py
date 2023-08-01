@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 
 INSTALLED_APPS = [
     'LoanRestProject',
+    'django_api_admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'corsheaders'
+
 
 ]
 
@@ -50,6 +53,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -85,16 +89,16 @@ WSGI_APPLICATION = 'LoanRestProject.wsgi.app'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'ENGINE': 'django.db.backends.postgresql',
-        'URL': 'postgresql://postgres:OP9WnZ5WQ0RmttpAAeNK@containers-us-west-110.railway.app:5566/railway',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'OP9WnZ5WQ0RmttpAAeNK',
-        'HOST': 'containers-us-west-110.railway.app',
-        'PORT': '5566',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        ##'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'ENGINE': 'django.db.backends.postgresql',
+        # 'URL': 'postgresql://postgres:OP9WnZ5WQ0RmttpAAeNK@containers-us-west-110.railway.app:5566/railway',
+        # 'NAME': 'railway',
+        # 'USER': 'postgres',
+        # 'PASSWORD': 'OP9WnZ5WQ0RmttpAAeNK',
+        # 'HOST': 'containers-us-west-110.railway.app',
+        # 'PORT': '5566',
     }
 }
 
@@ -146,3 +150,5 @@ AUTH_USER_MODEL="LoanRestProject.User"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+CORS_ALLOW_ALL_ORIGINS = True

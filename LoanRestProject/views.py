@@ -148,6 +148,8 @@ def post_outbound_loan(request):
     r_amount=request.data['Amount']
     bank=Bank.objects.get()
     bankserilizer=BankSerializer(bank)
+    interest_amount=(r_amount*int(bankserilizer.data['InterestRate']))/100
+
     inboundloans_sum=InboundLoan.objects.aggregate(Sum('Amount'))
     print(inboundloans_sum)
     unpaidoutboundloans_sum=OutboundLoan.objects.aggregate(Sum('UnpaidAmount'))
@@ -167,11 +169,12 @@ def post_outbound_loan(request):
     
     request.data['CustomerID']=user_id
     request.data['TotalNumberOfPaymets']=int(bankserilizer.data['NumberOfPayments']) 
-    request.data['PaymentAmount']=r_amount/int(bankserilizer.data['NumberOfPayments']) 
+    request.data['PaymentAmount']=(r_amount+interest_amount)/int(bankserilizer.data['NumberOfPayments']) 
     request.data['NumberOfPaidPayments']=0
     request.data['NumberOfUnPaidPayments']=int(bankserilizer.data['NumberOfPayments']) 
     request.data['PaidAmount']=0
-    request.data['UnpaidAmount']=r_amount
+    request.data['InterestAmount']=interest_amount
+    request.data['UnpaidAmount']=r_amount+interest_amount
     serializer=OutboundLoanSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()

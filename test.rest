@@ -1,4 +1,4 @@
-POST https://loan-app-livid.vercel.app/signup 
+POST http://abdelrahmanelkhradely.pythonanywhere.com/signup 
 Content-Type: application/json
 
 { "username": "Ayman","password": "Pass1234!", "email": "adam@mail.com","Role":"Personnel" }

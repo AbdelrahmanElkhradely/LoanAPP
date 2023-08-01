@@ -90,6 +90,7 @@ class OutboundLoan(models.Model):
     PaymentAmount=models.FloatField()
     NumberOfPaidPayments=models.IntegerField()
     NumberOfUnPaidPayments=models.IntegerField()
+    InterestAmount=models.FloatField()
     PaidAmount=models.FloatField()
     UnpaidAmount=models.FloatField()
     CreateDate=models.DateTimeField(auto_now_add=True)
@@ -100,6 +101,7 @@ class Bank(models.Model):
     MinAmount=models.IntegerField()
     MaxAmount=models.IntegerField()
     NumberOfPayments=models.IntegerField()
+    InterestRate=models.IntegerField()
     CustomerID=models.ForeignKey(User,on_delete=models.CASCADE)
     CreateDate=models.DateTimeField(auto_now_add=True)
 
