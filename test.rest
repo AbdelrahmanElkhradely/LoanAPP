@@ -1,7 +1,7 @@
 POST http://127.0.0.1:8000/signup 
 Content-Type: application/json
 
-{ "username": "c","password": "Pass1234!", "email": "adam@mail.com","Role":"Customer" }
+{ "username": "pppppp","password": "Pass1234!", "email": "adam@mail.com","Role":"Provider" }
 
 ###
 
@@ -19,7 +19,7 @@ Authorization: token e0108ed18d3302e1d86cfdc50e31d000c8d787bb
 
 POST http://127.0.0.1:8000/postinboundloans 
 Content-Type: application/json
-Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
+Authorization: token b5260099d10ad76c7ecca41e6d2b8e035047828c
 
 {"Amount":"2000000"}
 
