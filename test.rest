@@ -1,7 +1,7 @@
-POST http://127.0.0.1:8000/signup 
+POST https://loan-app-livid.vercel.app/signup 
 Content-Type: application/json
 
-{ "username": "Abdelrahman","password": "Pass1234!", "email": "adam@mail.com","Role":"Personnel" }
+{ "username": "Ayman","password": "Pass1234!", "email": "adam@mail.com","Role":"Personnel" }
 
 ###
 
