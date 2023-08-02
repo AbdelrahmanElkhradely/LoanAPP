@@ -59,5 +59,5 @@ urlpatterns = [
     
 ]
 
-# urlpatterns = [path(r'LoanApp/', include(urlpatterns))]
+urlpatterns = [path(r'LoanApp/', include(urlpatterns))]
 
