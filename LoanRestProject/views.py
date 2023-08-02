@@ -32,6 +32,7 @@ res={
      409: 'Duplicate request0',
      422: 'Invalid schema '
      }
+
 @swagger_auto_schema(
     methods=['post'],
     request_body=openapi.Schema(
@@ -155,13 +156,14 @@ def get_inbound_loan_list(request):
     inboundloans=InboundLoan.objects.filter(ProviderID=user_id)
     total=0
     count=0
-
     for inboundloan in inboundloans:
         total+=inboundloan.Amount
         count+=1
 
+    print('d5lt')    
     serializer=InboundLoanSerializer(inboundloans , many=True)
-    return JsonResponse({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data},status.HTTP_200_OK)
+    print(total)
+    return Response({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data},status.HTTP_200_OK)
 
 @swagger_auto_schema(
     methods=['post'],
@@ -170,7 +172,6 @@ def get_inbound_loan_list(request):
         required=['Amount'],
         properties={
             "Amount":openapi.Schema(type=openapi.TYPE_STRING,default="10000"),
-
         },
     ),
     operation_description='Create an Inbound Loan' ,
@@ -185,8 +186,9 @@ def post_inbound_loan(request):
     user_id=request.user.id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
-    
+    request.data['ProviderID']=user_id
     serializer=InboundLoanSerializer(data=request.data)
+    print(serializer)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
@@ -328,7 +330,7 @@ def get_outbound_loan_list(request):
         count+=1
 
     serializer=OutboundLoanSerializer(outboundloans , many=True)
-    return JsonResponse({'Total number of loans':count,'Total unpaid loans amount':total,'outboundloans' : serializer.data},status.HTTP_200_OK)
+    return Response({'Total number of loans':count,'Total unpaid loans amount':total,'outboundloans' : serializer.data},status.HTTP_200_OK)
 
 
 @swagger_auto_schema(

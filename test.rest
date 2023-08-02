@@ -1,7 +1,7 @@
-POST http://127.0.0.1:8000/signup 
+POST http://127.0.0.1:8000/LoanApp/register 
 Content-Type: application/json
 
-{ "username": "uu","password": "Pass1234!", "email": "adam@mail.com","Role":"Provider" }
+{ "username": "qp","password": "Pass1234!", "email": "adam@mail.com","Role":"Provider" }
 
 ###
 
@@ -17,23 +17,23 @@ Content-Type: application/json
 Authorization: token e0108ed18d3302e1d86cfdc50e31d000c8d787bb
 ###
 
-POST http://127.0.0.1:8000/postinboundloans 
+POST http://127.0.0.1:8000/LoanApp/postinboundloans 
 Content-Type: application/json
-Authorization: token b5260099d10ad76c7ecca41e6d2b8e035047828c
+Authorization: token 0dd65aced1171d9afaa77c4d4017ae42890780ef
 
-{"Amount":"2000000"}
+{"Amount":2000000}
 
 ###
 
-GET http://127.0.0.1:8000/getinboundloans 
+POST  http://127.0.0.1:8000/LoanApp/getinboundloans 
 Content-Type: application/json
-Authorization: token 24415833242863182def77040d689fb05d032f56
+Authorization: token 0dd65aced1171d9afaa77c4d4017ae42890780ef
 
-{"ProviderID":1}
+# {"ProviderID":1}
 
 ###
 
-Post http://127.0.0.1:8000/setbankparameter 
+Post http://127.0.0.1:8000/LoanApp/setbankparameter 
 Content-Type: application/json
 Authorization: token 858adb38fa38dddc8465bd3f2bdabaee63f214fa
 
@@ -48,7 +48,7 @@ Authorization: token 858adb38fa38dddc8465bd3f2bdabaee63f214fa
 
 ###
 
-POST http://127.0.0.1:8000/postoutboundloans 
+POST http://127.0.0.1:8000/LoanApp/postoutboundloans 
 Content-Type: application/json
 Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
@@ -57,15 +57,15 @@ Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
 ###
 
-GET http://127.0.0.1:8000/getoutboundloans 
+POST http://127.0.0.1:8000/LoanApp/getoutboundloans 
 Content-Type: application/json
-Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c564
+Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
 {"CustomerID":10000}
 
 ###
 
-POST http://127.0.0.1:8000/postpayment 
+POST http://127.0.0.1:8000/LoanApp/postpayment 
 Content-Type: application/json
 Authorization: token 287881b303457e1662bbe84d3f624a00c2d4c565
 
