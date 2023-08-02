@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-q10c+btvjz8(sp2g5u_i6i5^d+o!06$dcfva(w-t9zbp#(=*)!
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app','https://loan-app-1kgd.vercel.app/']
 
 
 # Application definition
@@ -46,14 +46,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_swagger',
     'drf_yasg',
-    'rest_framework_simplejwt'
-
-
 ]
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

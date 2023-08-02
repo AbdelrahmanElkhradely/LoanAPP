@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework_swagger.views import get_swagger_view
-from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
