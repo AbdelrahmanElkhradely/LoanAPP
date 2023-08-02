@@ -16,7 +16,38 @@ from django.db.models import Sum
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from rest_framework_swagger.views import get_swagger_view
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
+
+schema_view = get_swagger_view(title='Pastebin API')
+res={
+     200:'Success request',
+     201:'Success creation request',
+     400: 'Bad request',
+     403:'Invalid token (Forbidden)',
+     404: 'Not found request',
+     405: 'Unauthrized user ( doesn\'t have the permission to access this API )',
+     409: 'Duplicate request0',
+     422: 'Invalid schema '
+     }
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['username','password', 'email', 'Role'],
+        properties={
+            "username":openapi.Schema(type=openapi.TYPE_STRING,default="Abdo"),
+            "password":openapi.Schema(type=openapi.TYPE_STRING,default="123456"),
+            "email":openapi.Schema(type=openapi.TYPE_STRING,default="Abdo@gmail.com"),
+            "Role":openapi.Schema(type=openapi.TYPE_STRING,default="Provider")
+        },
+    ),
+    operation_description='Register new user' ,
+    responses=res
+)
 @api_view(['POST'])
 def signup(request):
     content_type = ContentType.objects.get_for_model(LoanRestProject.models.User)
@@ -31,8 +62,7 @@ def signup(request):
         elif request.data['Role'] == 'Personnel':
             serializer = PersonnelSerializer(data=request.data)
         else:
-            return Response({"Error":"Invalid user role"}, status=status.HTTP_200_OK)
-        
+            return Response({"Error":"Invalid user role"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             user = LoanRestProject.models.User.objects.get(username=request.data['username'])
@@ -40,9 +70,6 @@ def signup(request):
             if user.role=='PROVIDER':
                 for perm in permissions:
                     if perm.codename=='view_inboundloans' or perm.codename=='add_inboundloans':
-                        print("permission added")
-                        print(perm.codename)
-                        print("---------")
                         user.user_permissions.add(perm)
                         user.save()
             elif user.role=='CUSTOMER':
@@ -60,9 +87,21 @@ def signup(request):
              return Response({"Error":"user name is already exist"}, status=status.HTTP_409_CONFLICT)
 
     else:
-        return Response(serializer.errors, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['username','password'],
+        properties={
+            "username":openapi.Schema(type=openapi.TYPE_STRING,default="Abdo"),
+            "password":openapi.Schema(type=openapi.TYPE_STRING,default="123456")
+        },
+    ),
+    operation_description='Login user' ,
+    responses=res
+)
 @api_view(['POST'])
 def login(request):
     user = get_object_or_404(LoanRestProject.models.User, username=request.data['username'])
@@ -74,19 +113,31 @@ def login(request):
     return Response({'token': token.key, 'user': serializer.data},status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def test_token(request):
-    print(request.auth )
-    user_id = Token.objects.get(key=request.auth.key).user_id
-    user = get_object_or_404(LoanRestProject.models.User, id=user_id)
-    print(user.has_perm('LoanRestProject.view_inboundloans'))
-    print(user.user_permissions)
-    print(request.user)
-    return Response("passed!")
+# @api_view(['GET'])
+# @authentication_classes([SessionAuthentication, TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+# def test_token(request):
+    # print(request.auth )
+    # user_id = Token.objects.get(key=request.auth.key).user_id
+    # user = get_object_or_404(LoanRestProject.models.User, id=user_id)
+    # print(user.has_perm('LoanRestProject.view_inboundloans'))
+    # print(user.user_permissions)
+    # print(request.user)
+    # return Response("passed!")
 
-@api_view(['GET'])
+@swagger_auto_schema(
+    methods=['POST'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "ProviderID":openapi.Schema(type=openapi.TYPE_STRING,default="1"),
+        },
+    ),
+    
+    operation_description='Get all inbound loans for current provider (provider profile) --- Get all inbound loans for provider id in body (Personnel profile) ' ,
+    responses=res
+)
+@api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @permission_required('LoanRestProject.view_inboundloans')
@@ -113,7 +164,19 @@ def get_inbound_loan_list(request):
     serializer=InboundLoanSerializer(inboundloans , many=True)
     return JsonResponse({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data},status.HTTP_200_OK)
 
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['Amount'],
+        properties={
+            "Amount":openapi.Schema(type=openapi.TYPE_STRING,default="10000"),
 
+        },
+    ),
+    operation_description='Create an Inbound Loan' ,
+    responses=res
+)
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -121,7 +184,6 @@ def get_inbound_loan_list(request):
 def post_inbound_loan(request):
     # user_id = Token.objects.get(key=request.auth.key).user_id
     user_id=request.user.id
-    request.data['ProviderID']=user_id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
     
@@ -132,7 +194,23 @@ def post_inbound_loan(request):
     else:
         return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+@swagger_auto_schema(
 
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['MinAmount','MaxAmount','NumberOfPayments','InterestRate'],
+        properties={
+            "MinAmount":openapi.Schema(type=openapi.TYPE_INTEGER,default="10000"),
+            "MaxAmount":openapi.Schema(type=openapi.TYPE_INTEGER,default="10000"),
+            "NumberOfPayments":openapi.Schema(type=openapi.TYPE_INTEGER,default="10000"),
+            "InterestRate":openapi.Schema(type=openapi.TYPE_INTEGER,default="10000")
+        },
+    ),
+    operation_description='Create an Inbound Loan' ,
+    responses=res
+
+)
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -152,6 +230,19 @@ def post_bank_parameter(request):
         return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['Amount'],
+        properties={
+            "Amount":openapi.Schema(type=openapi.TYPE_STRING,default="10000"),
+
+        },
+    ),
+    operation_description='Create an Outboand Loan' ,
+    responses=res
+)
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -201,7 +292,19 @@ def post_outbound_loan(request):
         return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
-@api_view(['GET'])
+
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "CustomerID":openapi.Schema(type=openapi.TYPE_STRING,default="1"),
+        },
+    ),
+    operation_description='Get all inbound loans for current CUSTOMER (provider profile) --- Get all inbound loans for CustomerID id in body (Personnel profile) ' ,
+    responses=res
+)
+@api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @permission_required('LoanRestProject.view_outboundloans')
@@ -228,6 +331,20 @@ def get_outbound_loan_list(request):
     serializer=OutboundLoanSerializer(outboundloans , many=True)
     return JsonResponse({'Total number of loans':count,'Total unpaid loans amount':total,'outboundloans' : serializer.data},status.HTTP_200_OK)
 
+
+@swagger_auto_schema(
+    methods=['post'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['LoanID'],
+        properties={
+            "LoanID":openapi.Schema(type=openapi.TYPE_STRING,default="10000"),
+
+        },
+    ),
+    operation_description='Create an Outboand Loan PAYMENT' ,
+    responses=res
+    )
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])

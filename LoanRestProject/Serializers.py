@@ -82,4 +82,11 @@ class PaymentSerializer(serializers.ModelSerializer):
             'LoanID',
             'CreateDate'
         ]
+class ProviderIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InboundLoan
+        fields=[
+            'ProviderID'
+        ]
+
 
