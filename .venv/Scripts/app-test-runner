@@ -1,0 +1,3 @@
+#!D:\LoanApp\.venv\Scripts\python.exe
+import app_test_runner
+app_test_runner.main()

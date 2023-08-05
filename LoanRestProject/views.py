@@ -29,7 +29,7 @@ res={
      403:'Invalid token (Forbidden)',
      404: 'Not found request',
      405: 'Unauthrized user ( doesn\'t have the permission to access this API )',
-     409: 'Duplicate request0',
+     409: 'Duplicate request',
      422: 'Invalid schema '
      }
 
@@ -82,7 +82,7 @@ def signup(request):
                     if perm.codename=='view_outboundloans' or perm.codename=='view_inboundloans' or perm.codename=='add_bankparameter':
                         user.user_permissions.add(perm)
                         user.save()
-            return Response({'token': token.key, 'user':serializer.data['username']},status.HTTP_200_OK)
+            return Response({'token': token.key, 'user':serializer.data['username']},status.HTTP_201_CREATED)
         else:
              return Response({"Error":"user name is already exist"}, status=status.HTTP_409_CONFLICT)
 
@@ -160,9 +160,7 @@ def get_inbound_loan_list(request):
         total+=inboundloan.Amount
         count+=1
 
-    print('d5lt')    
     serializer=InboundLoanSerializer(inboundloans , many=True)
-    print(total)
     return Response({'Total number of loans':count,'Total loans amount':total,'inboundloans' : serializer.data},status.HTTP_200_OK)
 
 @swagger_auto_schema(
@@ -188,7 +186,6 @@ def post_inbound_loan(request):
     serializer=FullUserserilizer(user)
     request.data['ProviderID']=user_id
     serializer=InboundLoanSerializer(data=request.data)
-    print(serializer)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
@@ -254,16 +251,19 @@ def post_outbound_loan(request):
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
 
-    
+    if "Amount" not in request.data.keys():
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
     r_amount=request.data['Amount']
     bank=Bank.objects.get()
     bankserilizer=BankSerializer(bank)
     interest_amount=(r_amount*int(bankserilizer.data['InterestRate']))/100
 
     inboundloans_sum=InboundLoan.objects.aggregate(Sum('Amount'))
-    print(inboundloans_sum)
+    # print(inboundloans_sum)
     unpaidoutboundloans_sum=OutboundLoan.objects.aggregate(Sum('UnpaidAmount'))
-    print(unpaidoutboundloans_sum)
+    # print(unpaidoutboundloans_sum)
 
     if inboundloans_sum['Amount__sum'] == None:
         inboundloans_sum['Amount__sum']=0
@@ -272,7 +272,6 @@ def post_outbound_loan(request):
         unpaidoutboundloans_sum['UnpaidAmount__sum']=0
 
     net_bank_balance=float(inboundloans_sum['Amount__sum'])-float(unpaidoutboundloans_sum['UnpaidAmount__sum'])
-    print(net_bank_balance)
     if int(r_amount) < int(bankserilizer.data['MinAmount']) or r_amount > int(bankserilizer.data['MaxAmount']) or r_amount > net_bank_balance:
             return Response({'Error':'INVALID Amount according to bank parameters'},status.HTTP_400_BAD_REQUEST)
     
@@ -354,14 +353,17 @@ def post_payment(request):
     user_id=request.user.id
     user = get_object_or_404(LoanRestProject.models.User, id=user_id)
     serializer=FullUserserilizer(user)
+    if "LoanID" not in request.data.keys():
+        return Response({'Error':'INVALID SCHEMA VALIDATION'},status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
     loanID=request.data['LoanID']
     # outboundloans=OutboundLoan.objects.filter(ID=loanID)
     outboundLoans=get_object_or_404(LoanRestProject.models.OutboundLoan,ID=loanID)
     serializer=OutboundLoanSerializer(outboundLoans)
     # serializer.data['PaidAmount']=1000
-    print(serializer.data)
     if int(user_id) != int(serializer.data['CustomerID']):
-        return Response({"Error":"This is not your loan"})
+        return Response({"Error":"This is not your loan"},status.HTTP_400_BAD_REQUEST)
     if int(serializer.data['NumberOfUnPaidPayments']) == 0  :
         return Response({"Error":"There is no payment required for this loan"},status.HTTP_400_BAD_REQUEST)
     
