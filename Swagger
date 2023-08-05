@@ -1,0 +1,344 @@
+swagger: '2.0'
+info:
+  title: LoanAPP API
+  description: BLNK task
+  contact:
+    email: a.elkhradely@gmail.com
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: /LoanApp
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+- Basic: []
+paths:
+  /getinboundloans:
+    post:
+      operationId: getinboundloans_create
+      description: 'Get all inbound loans for current provider (provider profile)
+        --- Get all inbound loans for provider id in body (Personnel profile) '
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            ProviderID:
+              type: string
+              default: '1'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - getinboundloans
+    parameters: []
+  /getoutboundloans:
+    post:
+      operationId: getoutboundloans_create
+      description: 'Get all inbound loans for current CUSTOMER (provider profile)
+        --- Get all inbound loans for CustomerID id in body (Personnel profile) '
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            CustomerID:
+              type: string
+              default: '1'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - getoutboundloans
+    parameters: []
+  /login:
+    post:
+      operationId: login_create
+      description: Login user
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - username
+          - password
+          type: object
+          properties:
+            username:
+              type: string
+              default: Abdo
+            password:
+              type: string
+              default: '123456'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - login
+    parameters: []
+  /postinboundloans:
+    post:
+      operationId: postinboundloans_create
+      description: Create an Inbound Loan
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - Amount
+          type: object
+          properties:
+            Amount:
+              type: string
+              default: '10000'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - postinboundloans
+    parameters: []
+  /postoutboundloans:
+    post:
+      operationId: postoutboundloans_create
+      description: Create an Outboand Loan
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - Amount
+          type: object
+          properties:
+            Amount:
+              type: string
+              default: '10000'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - postoutboundloans
+    parameters: []
+  /postpayment:
+    post:
+      operationId: postpayment_create
+      description: Create an Outboand Loan PAYMENT
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - LoanID
+          type: object
+          properties:
+            LoanID:
+              type: string
+              default: '10000'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - postpayment
+    parameters: []
+  /register:
+    post:
+      operationId: register_create
+      description: Register new user
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - username
+          - password
+          - email
+          - Role
+          type: object
+          properties:
+            username:
+              type: string
+              default: Abdo
+            password:
+              type: string
+              default: '123456'
+            email:
+              type: string
+              default: Abdo@gmail.com
+            Role:
+              type: string
+              default: Provider
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - register
+    parameters: []
+  /setbankparameter:
+    post:
+      operationId: setbankparameter_create
+      description: Create an Inbound Loan
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - MinAmount
+          - MaxAmount
+          - NumberOfPayments
+          - InterestRate
+          type: object
+          properties:
+            MinAmount:
+              type: integer
+              default: '10000'
+            MaxAmount:
+              type: integer
+              default: '10000'
+            NumberOfPayments:
+              type: integer
+              default: '10000'
+            InterestRate:
+              type: integer
+              default: '10000'
+      responses:
+        '200':
+          description: Success request
+        '201':
+          description: Success creation request
+        '400':
+          description: Bad request
+        '403':
+          description: Invalid token (Forbidden)
+        '404':
+          description: Not found request
+        '405':
+          description: Unauthrized user ( doesn't have the permission to access this
+            API )
+        '409':
+          description: Duplicate request
+        '422':
+          description: 'Invalid schema '
+      tags:
+      - setbankparameter
+    parameters: []
+definitions: {}
